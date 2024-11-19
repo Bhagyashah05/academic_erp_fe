@@ -1,12 +1,14 @@
 
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const navigate=useNavigate();
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -21,6 +23,7 @@ const Login = () => {
     try {
       const response = await axios.post('http://localhost:8080/api/v1/auth/admin/login', loginData);
       console.log(response.data); 
+      navigate('/domain');
     } catch (err) {
       setError('Login failed. Please check your credentials.');
     } finally {
