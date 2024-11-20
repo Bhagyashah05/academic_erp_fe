@@ -1,17 +1,27 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { UserProvider } from './UserContext';
 import Login from './components/login';
-import DomainPage from './components/domain';
-import './App.css';
+import Domain from './components/domain';
+import PrivateRoute from './PrivateRoute';
 
 const App = () => {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/domain" element={<DomainPage />} /> 
-      </Routes>
-    </Router>
+    <UserProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route
+            path="/domain"
+            element={
+              <PrivateRoute>
+                <Domain />
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </Router>
+    </UserProvider>
   );
 };
 
