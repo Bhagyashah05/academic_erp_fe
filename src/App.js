@@ -4,6 +4,7 @@ import { UserProvider } from './UserContext';
 import Login from './components/login';
 import Domain from './components/domain';
 import PrivateRoute from './PrivateRoute';
+// import DomainList from './components/DomainList'
 
 const App = () => {
   return (

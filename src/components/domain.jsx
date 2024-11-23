@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
+import  {createDomain, editDomain, fetchDomains}  from '../utils/api';
+import { fetchStudentsByDomain } from '../utils/api';
 import axios from 'axios';
 import {
   Table,
@@ -18,7 +20,7 @@ import { UserContext } from '../UserContext';
 import NavBar from './NavBar';
 
 const DomainList = () => {
-  const { setUser } = useContext(UserContext); // Accessing setUser from UserContext
+  const { setUser } = useContext(UserContext); 
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -34,25 +36,29 @@ const DomainList = () => {
 
   const [page, setPage] = useState(0); 
   const [rowsPerPage, setRowsPerPage] = useState(5); 
+  const [students, setStudents] = useState([]); 
+  const [showStudentsModal, setShowStudentsModal] = useState(false);
 
-  useEffect(() => {
-    const fetchDomains = async () => {
-      try {
-        const response = await axios.get('http://localhost:8080/api/v1/domain');
-        setDomains(response.data);
-      } catch (err) {
-        setError('Error fetching domains');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDomains();
+  useEffect( () => {
+    const response=async()=>{
+      const data =await fetchDomains();
+      console.log(data);
+      setDomains(data.data);
+    }
+    response();
+    setLoading(false);
+    
   }, []);
 
-  const handleLogout = () => {
-    setUser(null); // Clears user from context
-    localStorage.removeItem('user'); // Clears user data from localStorage
+  const handleShowStudents = async (domainId) => {
+    try {
+      const response = await fetchStudentsByDomain(domainId);
+      console.log(response.data);
+      setStudents(response.data);
+      setShowStudentsModal(true);
+    } catch (err) {
+      setError('Error fetching students');
+    }
   };
 
   const handleCreateClick = () => {
@@ -62,6 +68,7 @@ const DomainList = () => {
   const handleCloseModal = () => {
     setShowModal(false);
     setShowEditModal(false);
+    setShowStudentsModal(false); 
   };
 
   const handleInputChange = (e) => {
@@ -89,7 +96,8 @@ const DomainList = () => {
     };
 
     try {
-      const response = await axios.post('http://localhost:8080/api/v1/domain', domainToSubmit);
+      
+      const response= await createDomain(domainToSubmit)
       setDomains([...domains, response.data]);
       setShowModal(false);
       setNewDomain({ program: '', batch: '', capacity: '', qualification: '' });
@@ -107,7 +115,7 @@ const DomainList = () => {
     };
 
     try {
-      await axios.put(`http://localhost:8080/api/v1/domain/${domainToEdit.domainId}`, domainToEdit);
+      await editDomain(domainToEdit.domainId,domainToEdit)
       setDomains((prevDomains) =>
         prevDomains.map((domain) => (domain.domainId === domainToEdit.domainId ? domainToEdit : domain))
       );
@@ -141,14 +149,39 @@ const DomainList = () => {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    width: 400,
     bgcolor: 'background.paper',
     border: '2px solid #000',
     boxShadow: 24,
     p: 4,
+    maxWidth: '90%',  
+    width: 'auto',    
+    height: 'auto',   
+  };
+
+  const imageStyle = {
+    width: '50px',
+    height: '50px',
+    borderRadius: '50%',
+    objectFit: 'cover',
+  };
+  const placeholderImage =
+  'https://via.placeholder.com/50?text=No+Image';
+
+  const getImageUrl = (path) => {
+    if (path?.includes('drive.google.com')) {
+      const fileId = path.split('/d/')[1]?.split('/')[0];
+      console.log(fileId)
+      console.log('https://drive.google.com/thumbnail?sz=w640&id='+fileId)
+      return `https://drive.google.com/thumbnail?sz=w640&id=${fileId}`;
+    }
+    return path || placeholderImage;
   };
 
   return (
+    <>
+    {loading?(<div>loading.....</div>):(
+
+
     <div style={{ backgroundColor: 'lightyellow' }}>
       <NavBar />
       <h1 style={{ textAlign: 'center' }}>Domain List</h1>
@@ -184,7 +217,7 @@ background: "linear-gradient(90deg, rgba(213,184,15,1) 35%, rgba(117,255,0,1) 10
                   <Button variant="outlined" onClick={() => handleEdit(domain)}>
                     Edit
                   </Button>
-                  <Button variant="outlined" onClick={() => handleEdit(domain)}>
+                  <Button variant="outlined" onClick={() => handleShowStudents(domain.domainId)}>
                     Show Students
                   </Button>
                   </div>
@@ -302,7 +335,47 @@ background: "linear-gradient(90deg, rgba(213,184,15,1) 35%, rgba(117,255,0,1) 10
           </form>
         </Box>
       </Modal>
+
+      <Modal open={showStudentsModal} onClose={handleCloseModal}>
+        <Box sx={modalStyle}>
+          <h3>Students</h3>
+          <Table>
+            <TableHead>
+              <TableRow>
+              <TableCell></TableCell>
+                {/* <TableCell>Student ID</TableCell> */}
+                <TableCell>Roll Number</TableCell>
+                <TableCell>First Name</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell>CGPA</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {students.map((student) => (
+                <TableRow key={student.studentId}>
+                  <TableCell>
+                  <img
+                    src={getImageUrl(student.photographPath)}
+                    alt={`${student.firstName}'s Photograph`}
+                    style={imageStyle}
+                  />
+                </TableCell>
+                  {/* <TableCell>{student.studentId}</TableCell> */}
+                  <TableCell>{student.rollNumber}</TableCell>
+
+                  <TableCell>{student.firstName}</TableCell>
+                  <TableCell>{student.email}</TableCell>
+                  <TableCell>{student.cgpa}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Box>
+      </Modal>
+
     </div>
+    )}
+    </>
   );
 };
 
