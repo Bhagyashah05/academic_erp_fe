@@ -7,10 +7,15 @@ import {
   TableBody,
   TableCell,
   TableContainer,
+  Pagination,
   TableHead,
   TableRow,
   Paper,
   Button,
+  MenuItem,
+  InputLabel,
+  Select,
+  FormControl,
   Modal,
   TextField,
   Box,
@@ -22,6 +27,10 @@ import NavBar from './NavBar';
 const DomainList = () => {
   const { setUser } = useContext(UserContext); 
   const [domains, setDomains] = useState([]);
+  const [filteredDomains, setFilteredDomains] = useState([]);
+  const [years, setYears] = useState([]);
+  const [selectedDomain, setSelectedDomain] = useState('');
+  const [selectedYear, setSelectedYear] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
@@ -44,11 +53,44 @@ const DomainList = () => {
       const data =await fetchDomains();
       console.log(data);
       setDomains(data.data);
+      setFilteredDomains(data.data);
+
+      const uniqueYears = [
+          ...new Set(data.data.map((domain) => domain.batch)),
+        ].sort();
+        setYears(uniqueYears);
     }
+    
     response();
     setLoading(false);
     
   }, []);
+  const uniqueDomains = [
+    ...new Set(domains.map((domain) => domain.program?.toUpperCase()))
+  ].filter(Boolean);
+
+  const handleDomainFilterChange = (event) => {
+    const value = event.target.value;
+    setSelectedDomain(value);
+    applyFilters(value, selectedYear);
+  };
+
+  const handleYearFilterChange = (event) => {
+    const value = event.target.value;
+    setSelectedYear(value);
+    applyFilters(selectedDomain, value);
+  };
+
+  const applyFilters = (domainFilter, yearFilter) => {
+    const filtered = domains.filter((domain) => {
+      const matchesDomain =
+        !domainFilter || domain.program.toUpperCase() === domainFilter;
+      const matchesYear = !yearFilter || domain.batch === yearFilter;
+      return matchesDomain && matchesYear;
+    });
+    setFilteredDomains(filtered);
+    setPage(0);
+  };
 
   const handleShowStudents = async (domainId) => {
     try {
@@ -142,7 +184,7 @@ const DomainList = () => {
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
-  const paginatedDomains = domains.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const paginatedDomains = filteredDomains.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   const modalStyle = {
     position: 'absolute',
@@ -191,6 +233,40 @@ background: "linear-gradient(90deg, rgba(15,139,213,1) 35%, rgba(0,255,222,1) 10
           Create Domain
         </Button>
       </div>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', margin: '20px' }}>
+      <FormControl sx={{ width: 200 }}>
+      <InputLabel id="domain-filter-label">Domain</InputLabel>
+      <Select
+        labelId="domain-filter-label"
+        value={selectedDomain}
+        onChange={handleDomainFilterChange}
+      >
+        <MenuItem value="">All</MenuItem>
+        {uniqueDomains.map((domain) => (
+          <MenuItem key={domain} value={domain}>
+            {domain}
+          </MenuItem>
+        ))}
+      </Select>
+    </FormControl>
+
+
+        <FormControl sx={{ width: 200 }}>
+          <InputLabel id="year-filter-label">Year</InputLabel>
+          <Select
+            labelId="year-filter-label"
+            value={selectedYear}
+            onChange={handleYearFilterChange}
+          >
+            <MenuItem value="">All</MenuItem>
+            {years.map((year) => (
+              <MenuItem key={year} value={year}>
+                {year}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </div>
       <div style={{margin:"50px"}}>
       <TableContainer component={Paper} sx={{ background: "rgb(213,184,15)",
 background: "linear-gradient(90deg, rgba(213,184,15,1) 35%, rgba(117,255,0,1) 100%)" }}>
@@ -229,14 +305,14 @@ background: "linear-gradient(90deg, rgba(213,184,15,1) 35%, rgba(117,255,0,1) 10
         </Table>
       </TableContainer>
 
-      <TablePagination
-        component="div"
-        count={domains.length}
-        page={page}
-        onPageChange={handlePageChange}
-        rowsPerPage={rowsPerPage}
-        onRowsPerPageChange={handleRowsPerPageChange}
-      />
+      <Pagination
+      component="div"
+      count={Math.ceil(filteredDomains.length / rowsPerPage)}
+      page={page}
+      onChange={handlePageChange}
+      rowsPerPage={rowsPerPage}
+      onRowsPerPageChange={handleRowsPerPageChange}
+    />
       </div>
       
 
