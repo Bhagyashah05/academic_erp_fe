@@ -198,7 +198,7 @@ button:disabled {
 
 button[type="submit"],
 button[type="button"] {
-  background-color: #4CAF50;
+  background-color: blue;
   color: white;
   padding: 10px 20px;
   border: none;
@@ -212,3 +212,18 @@ button[type="button"]:hover {
   background-color: #45a049;
 }
 
+/* .Toastify__close-button--light {
+  color: red;
+  opacity: 0.3;
+  background-color: red;
+}
+.Toastify__close-button > svg {
+  fill: currentColor;
+  height: 16px;
+  width: 14px;
+  background-color: red;
+}
+.Toastify__close-button:hover, .Toastify__close-button:focus {
+  opacity: 1;
+  background-color: red;
+} */

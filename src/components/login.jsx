@@ -4,6 +4,9 @@ import axios from 'axios';
 import { UserContext } from '../UserContext';
 import iiitbImage from '../images/iiitb.jpeg';
 import { login } from '../utils/api';
+import { ToastContainer, toast ,Bounce} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+// import '../App.css'
 import {
   Box,
   Button,
@@ -35,17 +38,32 @@ const Login = () => {
 
     try {
       const response = await login(loginData)
+
       console.log(response.data);
       setUser(response.data);
       navigate('/domain'); 
     } catch (err) {
       setError('Login failed. Please check your credentials.');
+      toast.error('Login Failed', {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        closeButton:false,
+        transition: Bounce,
+        });
     } finally {
       setLoading(false);
     }
   };
 
   return (
+    <>
+    <ToastContainer className="custom-toast-container"/>
     <Box
   sx={{
     minHeight: '100vh',
@@ -122,7 +140,9 @@ const Login = () => {
         </form>
       </Paper>
     </Box>
-  );
+
+    </>
+      );
 };
 
 export default Login;

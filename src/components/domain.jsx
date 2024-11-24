@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import  {createDomain, editDomain, fetchDomains}  from '../utils/api';
 import { fetchStudentsByDomain } from '../utils/api';
-import axios from 'axios';
+// import axios from 'axios';
+import { ToastContainer, toast ,Bounce} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import {
   Table,
   TableBody,
@@ -23,6 +25,7 @@ import {
 } from '@mui/material';
 import { UserContext } from '../UserContext';
 import NavBar from './NavBar';
+// import { ToastContainer } from 'react-toastify';
 
 const DomainList = () => {
   const { setUser } = useContext(UserContext); 
@@ -143,7 +146,33 @@ const DomainList = () => {
       setDomains([...domains, response.data]);
       setShowModal(false);
       setNewDomain({ program: '', batch: '', capacity: '', qualification: '' });
+
+      toast.success('Domain Created Successfully!', {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+        closeButton:false
+        });
     } catch (err) {
+
+      toast.error('Domain Creation Failed', {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+        closeButton:false
+        });
       setError('Error creating domain');
     }
   };
@@ -162,8 +191,34 @@ const DomainList = () => {
         prevDomains.map((domain) => (domain.domainId === domainToEdit.domainId ? domainToEdit : domain))
       );
       setShowEditModal(false);
+
+      toast.success('Domain Edited Successfully!', {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+        closeButton:false
+        });
+      
     } catch (err) {
       setError('Error editing domain');
+      toast.error('Domain Not Edited!', {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        transition: Bounce,
+        closeButton:false
+        });
     }
   };
 
@@ -221,6 +276,7 @@ const DomainList = () => {
 
   return (
     <>
+    <ToastContainer/>
     {loading?(<div>loading.....</div>):(
 
 
@@ -268,8 +324,11 @@ background: "linear-gradient(90deg, rgba(15,139,213,1) 35%, rgba(0,255,222,1) 10
         </FormControl>
       </div>
       <div style={{margin:"50px"}}>
-      <TableContainer component={Paper} sx={{ background: "rgb(213,184,15)",
-background: "linear-gradient(90deg, rgba(213,184,15,1) 35%, rgba(117,255,0,1) 100%)" }}>
+      <TableContainer component={Paper} sx={{ 
+        // background: "rgb(255,255,255)",
+// background: "linear-gradient(115deg, rgba(255,255,255,1) 0%, rgba(5,5,10,1) 54%)" 
+background:"white"
+}}>
         <Table>
           <TableHead sx={{ backgroundColor: '#0288ff ', color: '#fff' }}>
           <TableRow>
