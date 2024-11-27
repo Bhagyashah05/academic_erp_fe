@@ -44,7 +44,8 @@ const Login = () => {
       navigate('/domain'); 
     } catch (err) {
       setError('Login failed. Please check your credentials.');
-      toast.error('Login Failed', {
+      console.log(err);
+      toast.error(err.response.data.message, {
         position: "top-center",
         autoClose: 5000,
         hideProgressBar: false,
