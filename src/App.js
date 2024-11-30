@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { UserProvider } from './UserContext';
 import Login from './components/login';
 import Domain from './components/domain';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import PrivateRoute from './PrivateRoute';
 // import DomainList from './components/DomainList'
 

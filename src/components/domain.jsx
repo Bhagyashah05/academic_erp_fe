@@ -4,6 +4,8 @@ import { fetchStudentsByDomain } from '../utils/api';
 // import axios from 'axios';
 import { ToastContainer, toast ,Bounce} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { startTokenExpiryCheck } from '../utils/api';
+
 import {
   Table,
   TableBody,
@@ -53,19 +55,26 @@ const DomainList = () => {
 
   useEffect( () => {
     const response=async()=>{
-      const data =await fetchDomains();
-      console.log(data);
-      setDomains(data.data);
-      setFilteredDomains(data.data);
+      try{
+        const data =await fetchDomains();
+        console.log(data);
+        setDomains(data.data);
+        setFilteredDomains(data.data);
 
       const uniqueYears = [
           ...new Set(data.data.map((domain) => domain.batch)),
         ].sort();
         setYears(uniqueYears);
+        setLoading(false);
+
+      }
+      catch(err){
+        console.log("error fetching domains");
+      }
+      
     }
-    
     response();
-    setLoading(false);
+    setTimeout(startTokenExpiryCheck,1000);
     
   }, []);
   const uniqueDomains = [
@@ -146,6 +155,7 @@ const DomainList = () => {
       setDomains([...domains, response.data]);
       setShowModal(false);
       setNewDomain({ program: '', batch: '', capacity: '', qualification: '' });
+      window.location.reload(); 
 
       toast.success('Domain Created Successfully!', {
         position: "top-center",
@@ -173,7 +183,7 @@ const DomainList = () => {
         transition: Bounce,
         closeButton:false
         });
-      setError('Error creating domain');
+      // setError('Error creating domain');
     }
   };
 
@@ -187,9 +197,11 @@ const DomainList = () => {
 
     try {
       await editDomain(domainToEdit.domainId,domainToEdit)
-      setDomains((prevDomains) =>
-        prevDomains.map((domain) => (domain.domainId === domainToEdit.domainId ? domainToEdit : domain))
+      setFilteredDomains((prevDomain) =>
+        prevDomain.map((domains) => (domains.domainId === domainToEdit.domainId ? domainToEdit : domains))
       );
+
+
       setShowEditModal(false);
 
       toast.success('Domain Edited Successfully!', {
@@ -206,7 +218,7 @@ const DomainList = () => {
         });
       
     } catch (err) {
-      setError('Error editing domain');
+      // setError('Error editing domain');
       toast.error('Domain Not Edited!', {
         position: "top-center",
         autoClose: 5000,
